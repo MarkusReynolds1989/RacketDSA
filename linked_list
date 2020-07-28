@@ -1,0 +1,48 @@
+#lang racket
+(require rackunit)
+;;; Implement a linked List ;;;
+
+(struct list-node (name val next) #:transparent
+  #:mutable)
+
+(define third (list-node "Third Node" 2 '()))
+(define second (list-node "Second Node" 1 third))
+(define head (list-node "First Node" 0 second))
+
+(define (print-list node)
+  "Print the linked-list starting from the head."
+  (if (null? node) '()
+      (begin
+        (printf "~s\t:\t~s\n" (list-node-name node)
+                (list-node-val node))
+        (print-list (list-node-next node)))))
+
+(define (end node)
+  "Cycle through the list and return the last node."
+  (if (null? (list-node-next node))
+      node
+      (end (list-node-next node))))
+
+(define (add-first name val)
+  "Add a new node to the front of the linked-list, returns the new head."
+  (set! head (list-node name val head))
+  head)
+
+(define (add-end name val)
+  "Add a new node to the end of the linked-list, return the head."
+  (let ([end (end head)])
+    (set-list-node-next! end (list-node name val '())))
+  head)
+   
+;;; Tests ;;;
+;; Node Checks ;;
+(check-equal? (list-node "First Node" 0 second) head)
+(check-equal? (list-node "Second Node" 1 third) second)
+(check-equal? (list-node "Third Node" 2 '()) third)
+;; Function Checks ;;
+;; Printing
+(check-eq? (print-list head) '())
+;;Adding in the Front;;
+(check-equal? (add-first "New" 23) head)
+;;Adding in the back;;
+(check-equal? (end (add-end "Last" 100)) (end head))
